@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm ls:*)",
+      "Bash(cargo check:*)",
+      "Bash(curl:*)",
+      "Bash(python:*)",
+      "Bash(where:*)",
+      "Bash(winget install:*)",
+      "Bash(dir \"C:\\\\Program Files\\\\mpv.net\")",
+      "Bash(dir \"C:\\\\Program Files \\(x86\\)\\\\mpv.net\")",
+      "Bash(dir \"C:\\\\Users\\\\Emma\\\\AppData\\\\Local\\\\Programs\\\\*mpv*\" /s /b)",
+      "Bash(powershell -Command:*)",
+      "Bash(choco install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git init:*)",
+      "Bash(git remote add:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}

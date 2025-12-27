@@ -1,0 +1,108 @@
+import { useState, useEffect, useCallback, useRef } from 'react'
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Volume1,
+  Maximize,
+  Minimize,
+  ArrowLeft,
+  Settings,
+  Subtitles,
+  AudioLines,
+  X,
+} from 'lucide-react'
+import { useNavigation } from '../contexts/NavigationContext'
+import { useConfigStore } from '../stores/configStore'
+import { playerService, PlaybackState } from '../services/player'
+import { jellyfinApi } from '../services/jellyfin'
+import type { BaseItemDto, MediaStream } from '../types'
+
+const CONTROLS_HIDE_DELAY = 3000
+const PROGRESS_REPORT_INTERVAL = 10000
+const SEEK_STEP = 10
+const VOLUME_STEP = 5
+const PLAYBACK_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+
+function formatTime(seconds: number): string {
+  if (!isFinite(seconds) || seconds < 0) return '0:00'
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+  if (hours > 0) {
+    return hours + ':' + minutes.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0')
+  }
+  return minutes + ':' + secs.toString().padStart(2, '0')
+}
+
+function ticksToSeconds(ticks: number): number {
+  return ticks / 10000000
+}
+
+function secondsToTicks(seconds: number): number {
+  return Math.floor(seconds * 10000000)
+}
+
+interface PlayerProps {
+  itemId?: string
+  mediaSourceId?: string
+  startPositionTicks?: number
+}
+
+interface TrackInfo {
+  index: number
+  label: string
+  language?: string
+  isDefault: boolean
+}
+
+export default function Player({ itemId, mediaSourceId, startPositionTicks }: PlayerProps) {
+  const { goBack, state: navState } = useNavigation()
+  const { serverUrl, accessToken, userId } = useConfigStore()
+
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPaused, setIsPaused] = useState(true)
+  const [position, setPosition] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [volume, setVolume] = useState(100)
+  const [isMuted, setIsMuted] = useState(false)
+  const [playbackSpeed, setPlaybackSpeed] = useState(1)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const [item, setItem] = useState<BaseItemDto | null>(null)
+  const [audioTracks, setAudioTracks] = useState<TrackInfo[]>([])
+  const [subtitleTracks, setSubtitleTracks] = useState<TrackInfo[]>([])
+  const [currentAudioTrack, setCurrentAudioTrack] = useState(0)
+  const [currentSubtitleTrack, setCurrentSubtitleTrack] = useState(-1)
+
+  const [showControls, setShowControls] = useState(true)
+  const [showCenterPlay, setShowCenterPlay] = useState(false)
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false)
+  const [showAudioMenu, setShowAudioMenu] = useState(false)
+  const [showSubtitleMenu, setShowSubtitleMenu] = useState(false)
+  const [isSeeking, setIsSeeking] = useState(false)
+  const [seekPosition, setSeekPosition] = useState(0)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const stateIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const playSessionIdRef = useRef<string | null>(null)
+  const centerPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const effectiveItemId = itemId || navState.params?.itemId
+
+  // Player will be implemented with full controls
+  // This is a placeholder that shows the basic structure
+  
+  return (
+    <div className="fixed inset-0 bg-black z-50">
+      <div className="flex items-center justify-center h-full">
+        <p className="text-white">Player Component - Full implementation in progress</p>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,26 @@
+[package]
+name = "jellyremote"
+version = "0.1.0"
+description = "A Jellyfin remote control application"
+authors = ["you"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+libmpv = "2.0"
+parking_lot = "0.12"
+log = "0.4"
+thiserror = "1.0"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

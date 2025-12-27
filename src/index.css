@@ -1,0 +1,233 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   JellyRemote Design System - Base Styles
+   ============================================ */
+
+@layer base {
+  /* Root variables for easy reference */
+  :root {
+    --bg-primary: #0F0F0F;
+    --bg-secondary: #1A1A1A;
+    --bg-hover: #252525;
+    --accent-primary: #DC2626;
+    --accent-hover: #EF4444;
+    --text-primary: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --border: #2D2D2D;
+  }
+
+  /* Base HTML styles */
+  html {
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-bg-primary text-text-primary;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  /* Typography defaults */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold text-text-primary;
+    letter-spacing: -0.01em;
+  }
+
+  h1 {
+    @apply text-4xl;
+  }
+
+  h2 {
+    @apply text-3xl;
+  }
+
+  h3 {
+    @apply text-2xl;
+  }
+
+  h4 {
+    @apply text-xl;
+  }
+
+  p {
+    @apply text-base text-text-secondary;
+  }
+
+  a {
+    @apply text-accent-primary hover:text-accent-hover transition-colors;
+  }
+
+  /* Focus styles for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent-primary ring-offset-2 ring-offset-bg-primary;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-accent-primary/30 text-text-primary;
+  }
+}
+
+@layer components {
+  /* Card component */
+  .card {
+    @apply bg-bg-secondary rounded-lg border border-border;
+  }
+
+  .card-hover {
+    @apply card hover:bg-bg-hover transition-colors cursor-pointer;
+  }
+
+  /* Button variants */
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium transition-colors;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent-primary text-white hover:bg-accent-hover;
+  }
+
+  .btn-secondary {
+    @apply btn bg-bg-secondary text-text-primary border border-border hover:bg-bg-hover;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover;
+  }
+
+  .btn-icon {
+    @apply btn p-2 bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover;
+  }
+
+  /* Input styles */
+  .input {
+    @apply w-full px-3 py-2 bg-bg-secondary border border-border rounded-md;
+    @apply text-text-primary placeholder:text-text-secondary/50;
+    @apply focus:outline-none focus:ring-2 focus:ring-accent-primary focus:border-transparent;
+    @apply transition-colors;
+  }
+
+  /* Badge/Tag */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply badge bg-accent-primary/20 text-accent-primary;
+  }
+
+  .badge-secondary {
+    @apply badge bg-bg-hover text-text-secondary;
+  }
+
+  /* Metadata text */
+  .metadata {
+    @apply text-sm text-text-secondary;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-t border-border;
+  }
+}
+
+@layer utilities {
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Truncate multiline */
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--bg-hover) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--bg-hover);
+    border-radius: 3px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #3a3a3a;
+  }
+
+  /* Gradient overlays */
+  .gradient-fade-b {
+    background: linear-gradient(to bottom, transparent, var(--bg-primary));
+  }
+
+  .gradient-fade-t {
+    background: linear-gradient(to top, transparent, var(--bg-primary));
+  }
+}
+
+/* Custom scrollbar for the whole app */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-hover);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
