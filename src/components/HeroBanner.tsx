@@ -71,7 +71,7 @@ export const HeroBanner = memo(function HeroBanner({
   const genres = featuredItem.Genres?.slice(0, 3).join(' · ')
 
   return (
-    <section className="relative w-full aspect-[16/10] max-h-[500px] overflow-hidden">
+    <section className="relative w-full aspect-[21/9] max-h-[280px] overflow-hidden">
       {/* Backdrop Image */}
       <div className="absolute inset-0">
         {backdropUrl ? (
@@ -90,31 +90,31 @@ export const HeroBanner = memo(function HeroBanner({
       <div className="absolute inset-0 bg-gradient-to-r from-bg-primary/80 via-transparent to-transparent" />
 
       {/* Content */}
-      <div className="absolute inset-0 flex flex-col justify-end p-4 pb-6">
+      <div className="absolute inset-0 flex flex-col justify-end p-3 pb-4">
         {/* Logo or Title */}
         {logoUrl ? (
           <img
             src={logoUrl}
             alt={featuredItem.Name}
-            className="max-w-[200px] max-h-16 object-contain object-left mb-3"
+            className="max-w-[180px] max-h-12 object-contain object-left mb-2"
           />
         ) : (
-          <h1 className="text-2xl font-bold text-text-primary mb-2 line-clamp-2">
+          <h1 className="text-xl font-bold text-text-primary mb-1.5 line-clamp-1">
             {featuredItem.Name}
           </h1>
         )}
 
         {/* Metadata */}
-        <div className="flex flex-wrap items-center gap-2 text-sm text-text-secondary mb-3">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-text-secondary mb-2">
           {rating && (
             <span className="flex items-center gap-1 text-yellow-500">
-              <Star className="w-3.5 h-3.5 fill-current" />
+              <Star className="w-3 h-3 fill-current" />
               {rating.toFixed(1)}
             </span>
           )}
           {year && <span>{year}</span>}
           {featuredItem.OfficialRating && (
-            <span className="px-1.5 py-0.5 border border-text-secondary/50 rounded text-xs">
+            <span className="px-1 py-0.5 border border-text-secondary/50 rounded text-xs">
               {featuredItem.OfficialRating}
             </span>
           )}
@@ -122,27 +122,27 @@ export const HeroBanner = memo(function HeroBanner({
           {genres && <span className="text-text-secondary/80">{genres}</span>}
         </div>
 
-        {/* Overview */}
+        {/* Overview - hidden on compact mode */}
         {featuredItem.Overview && (
-          <p className="text-sm text-text-secondary line-clamp-2 mb-4 max-w-lg">
+          <p className="text-xs text-text-secondary line-clamp-1 mb-2 max-w-md hidden sm:block">
             {featuredItem.Overview}
           </p>
         )}
 
         {/* Buttons */}
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
             onClick={() => onPlay?.(featuredItem)}
-            className="btn-primary flex items-center gap-2 px-5"
+            className="btn-primary flex items-center gap-1.5 px-4 py-1.5 text-sm"
           >
-            <Play className="w-4 h-4 fill-current" />
+            <Play className="w-3.5 h-3.5 fill-current" />
             Play
           </button>
           <button
             onClick={() => onMoreInfo?.(featuredItem)}
-            className="btn-secondary flex items-center gap-2"
+            className="btn-secondary flex items-center gap-1.5 py-1.5 text-sm"
           >
-            <Info className="w-4 h-4" />
+            <Info className="w-3.5 h-3.5" />
             More Info
           </button>
         </div>
@@ -153,20 +153,18 @@ export const HeroBanner = memo(function HeroBanner({
 
 function HeroBannerSkeleton() {
   return (
-    <section className="relative w-full aspect-[16/10] max-h-[500px] overflow-hidden bg-bg-secondary animate-pulse">
+    <section className="relative w-full aspect-[21/9] max-h-[280px] overflow-hidden bg-bg-secondary animate-pulse">
       <div className="absolute inset-0 bg-gradient-to-t from-bg-primary via-bg-primary/60 to-transparent" />
-      <div className="absolute inset-0 flex flex-col justify-end p-4 pb-6">
-        <div className="h-8 w-48 bg-bg-hover rounded mb-3" />
-        <div className="flex gap-2 mb-3">
-          <div className="h-4 w-12 bg-bg-hover rounded" />
-          <div className="h-4 w-16 bg-bg-hover rounded" />
-          <div className="h-4 w-20 bg-bg-hover rounded" />
+      <div className="absolute inset-0 flex flex-col justify-end p-3 pb-4">
+        <div className="h-6 w-40 bg-bg-hover rounded mb-2" />
+        <div className="flex gap-2 mb-2">
+          <div className="h-3 w-10 bg-bg-hover rounded" />
+          <div className="h-3 w-14 bg-bg-hover rounded" />
+          <div className="h-3 w-16 bg-bg-hover rounded" />
         </div>
-        <div className="h-4 w-full max-w-md bg-bg-hover rounded mb-2" />
-        <div className="h-4 w-3/4 max-w-sm bg-bg-hover rounded mb-4" />
-        <div className="flex gap-3">
-          <div className="h-10 w-24 bg-bg-hover rounded-md" />
-          <div className="h-10 w-28 bg-bg-hover rounded-md" />
+        <div className="flex gap-2">
+          <div className="h-8 w-20 bg-bg-hover rounded-md" />
+          <div className="h-8 w-24 bg-bg-hover rounded-md" />
         </div>
       </div>
     </section>

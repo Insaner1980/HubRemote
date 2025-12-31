@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ArrowLeft,
+  Home,
   Play,
-  Tv,
   Heart,
   Check,
   Star,
@@ -10,12 +10,20 @@ import {
   Calendar,
   Loader2,
   ChevronDown,
+  Tv,
+  X,
+  Monitor,
+  Smartphone,
+  Tablet,
+  Tv2,
 } from 'lucide-react'
 import { CastList, EpisodeCard, MediaRow } from '../components'
 import { useItem, useSeasons, useEpisodes, useSimilarItems, useToggleFavorite, useTogglePlayed } from '../hooks'
 import { useNavigation } from '../contexts/NavigationContext'
-import { jellyfinApi } from '../services'
-import type { BaseItemDto } from '../types'
+import { useConfigStore } from '../stores/configStore'
+import { jellyfinApi, streamingService } from '../services'
+import { toast } from '../stores/toastStore'
+import type { BaseItemDto, SessionInfo } from '../types'
 
 interface ItemDetailProps {
   itemId: string
@@ -30,7 +38,16 @@ function formatRuntime(ticks: number): string {
 }
 
 export default function ItemDetail({ itemId }: ItemDetailProps) {
-  const { goBack, canGoBack, navigateToItem } = useNavigation()
+  const { goBack, canGoBack, navigate, navigateToItem, navigateToPlayer } = useNavigation()
+  const [showCastDialog, setShowCastDialog] = useState(false)
+
+  const handleBack = () => {
+    if (canGoBack) {
+      goBack()
+    } else {
+      navigate('home')
+    }
+  }
   const { data: item, isLoading } = useItem(itemId)
   const { data: similarItems } = useSimilarItems(itemId)
   const toggleFavorite = useToggleFavorite()
@@ -46,14 +63,29 @@ export default function ItemDetail({ itemId }: ItemDetailProps) {
 
   const isSeries = item.Type === 'Series'
 
-  const handlePlay = () => {
-    console.log('Play:', item.Name, item.Id)
-    // TODO: Start playback
+  const handlePlay = async () => {
+    // For series, play the next unwatched episode or first episode
+    if (isSeries) {
+      const { userId } = useConfigStore.getState()
+      if (!userId) return
+
+      const episode = await jellyfinApi.getFirstEpisode(item.Id, userId)
+      if (episode) {
+        const startPosition = episode.UserData?.PlaybackPositionTicks || 0
+        navigateToPlayer(episode.Id, startPosition)
+      }
+      return
+    }
+
+    // For movies/episodes, start playback
+    // Resume from position if there's progress
+    const startPosition = item.UserData?.PlaybackPositionTicks || 0
+    navigateToPlayer(item.Id, startPosition)
   }
 
-  const handlePlayOnTV = () => {
-    console.log('Play on TV:', item.Name, item.Id)
-    // TODO: Open device selector
+  const handlePlayEpisode = (episode: BaseItemDto) => {
+    const startPosition = episode.UserData?.PlaybackPositionTicks || 0
+    navigateToPlayer(episode.Id, startPosition)
   }
 
   const handleToggleFavorite = () => {
@@ -75,14 +107,23 @@ export default function ItemDetail({ itemId }: ItemDetailProps) {
       {/* Hero Section */}
       <HeroSection
         item={item}
-        onBack={canGoBack ? goBack : undefined}
+        onBack={handleBack}
+        canGoBack={canGoBack}
         onPlay={handlePlay}
-        onPlayOnTV={handlePlayOnTV}
+        onCast={() => setShowCastDialog(true)}
         onToggleFavorite={handleToggleFavorite}
         onTogglePlayed={handleTogglePlayed}
         isFavorite={item.UserData?.IsFavorite}
         isPlayed={item.UserData?.Played}
       />
+
+      {/* Cast to TV Dialog */}
+      {showCastDialog && (
+        <CastDialog
+          item={item}
+          onClose={() => setShowCastDialog(false)}
+        />
+      )}
 
       {/* Cast */}
       {item.People && item.People.length > 0 && (
@@ -93,7 +134,7 @@ export default function ItemDetail({ itemId }: ItemDetailProps) {
       {isSeries && (
         <SeriesContent
           seriesId={item.Id}
-          onEpisodeClick={(episode) => console.log('Play episode:', episode.Name)}
+          onEpisodeClick={handlePlayEpisode}
         />
       )}
 
@@ -116,17 +157,19 @@ export default function ItemDetail({ itemId }: ItemDetailProps) {
 function HeroSection({
   item,
   onBack,
+  canGoBack = false,
   onPlay,
-  onPlayOnTV,
+  onCast,
   onToggleFavorite,
   onTogglePlayed,
   isFavorite,
   isPlayed,
 }: {
   item: BaseItemDto
-  onBack?: () => void
+  onBack: () => void
+  canGoBack?: boolean
   onPlay: () => void
-  onPlayOnTV: () => void
+  onCast: () => void
   onToggleFavorite: () => void
   onTogglePlayed: () => void
   isFavorite?: boolean
@@ -168,15 +211,14 @@ function HeroSection({
         <div className="absolute inset-0 bg-gradient-to-r from-bg-primary/80 via-transparent to-transparent" />
       </div>
 
-      {/* Back Button */}
-      {onBack && (
-        <button
-          onClick={onBack}
-          className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-      )}
+      {/* Back/Home Button - always visible */}
+      <button
+        onClick={onBack}
+        className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+        title={canGoBack ? 'Go back' : 'Go home'}
+      >
+        {canGoBack ? <ArrowLeft className="w-5 h-5" /> : <Home className="w-5 h-5" />}
+      </button>
 
       {/* Content */}
       <div className="relative pt-32 px-4">
@@ -265,11 +307,11 @@ function HeroSection({
           </button>
 
           <button
-            onClick={onPlayOnTV}
+            onClick={onCast}
             className="btn-secondary flex items-center gap-2"
           >
             <Tv className="w-4 h-4" />
-            Play on TV
+            Cast to TV
           </button>
 
           <button
@@ -441,5 +483,148 @@ function SeriesContent({
         )}
       </div>
     </section>
+  )
+}
+
+// Cast to TV Dialog
+function CastDialog({
+  item,
+  onClose,
+}: {
+  item: BaseItemDto
+  onClose: () => void
+}) {
+  const [sessions, setSessions] = useState<SessionInfo[]>([])
+  const [loading, setLoading] = useState(true)
+  const [casting, setCasting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch sessions on mount
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        setLoading(true)
+        const allSessions = await jellyfinApi.getSessions()
+        // Show all sessions - TV apps may not support remote control but can receive playback
+        setSessions(allSessions)
+      } catch (e) {
+        setError('Failed to load devices')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchSessions()
+  }, [])
+
+  const handleCast = async (session: SessionInfo) => {
+    try {
+      setCasting(true)
+      setError(null)
+
+      // Use Jellyfin's playOnSession - the TV will request the video from Jellyfin
+      // and Jellyfin will handle streaming/transcoding as needed
+      const startPosition = item.UserData?.PlaybackPositionTicks || 0
+      await jellyfinApi.playOnSession(session.Id, [item.Id], {
+        startPositionTicks: startPosition,
+      })
+      toast.success('Playing on TV', `Started playback on ${session.DeviceName}`)
+
+      onClose()
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Failed to cast'
+      setError(msg)
+      toast.error('Cast failed', msg)
+    } finally {
+      setCasting(false)
+    }
+  }
+
+  // Get device icon
+  const getDeviceIcon = (deviceName: string, client: string) => {
+    const name = (deviceName + client).toLowerCase()
+    if (name.includes('tv') || name.includes('android tv') || name.includes('fire') || name.includes('tizen') || name.includes('webos')) {
+      return Tv2
+    }
+    if (name.includes('phone') || name.includes('mobile') || name.includes('ios') || name.includes('iphone')) {
+      return Smartphone
+    }
+    if (name.includes('android') && !name.includes('tv')) {
+      return Smartphone
+    }
+    if (name.includes('tablet') || name.includes('ipad')) {
+      return Tablet
+    }
+    return Monitor
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+      <div className="bg-bg-secondary rounded-xl max-w-md w-full max-h-[80vh] overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="text-lg font-semibold text-text-primary">Cast to TV</h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-bg-hover transition-colors"
+          >
+            <X className="w-5 h-5 text-text-secondary" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 overflow-y-auto max-h-[60vh]">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 text-accent-primary animate-spin" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-500">{error}</p>
+            </div>
+          ) : sessions.length === 0 ? (
+            <div className="text-center py-8">
+              <Tv className="w-12 h-12 text-text-secondary mx-auto mb-3" />
+              <p className="text-text-primary font-medium">No devices found</p>
+              <p className="text-text-secondary text-sm mt-1">
+                Open Jellyfin on your TV to see it here
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-text-secondary mb-3">
+                Select a device to play "{item.Name}"
+              </p>
+              {sessions.map((session) => {
+                const DeviceIcon = getDeviceIcon(session.DeviceName, session.Client)
+                return (
+                  <button
+                    key={session.Id}
+                    onClick={() => handleCast(session)}
+                    disabled={casting}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg bg-bg-primary hover:bg-bg-hover transition-colors disabled:opacity-50"
+                  >
+                    <div className="p-2 rounded-full bg-bg-secondary">
+                      <DeviceIcon className="w-5 h-5 text-text-secondary" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <p className="font-medium text-text-primary">{session.DeviceName}</p>
+                      <p className="text-sm text-text-secondary">{session.Client}</p>
+                    </div>
+                    {casting && <Loader2 className="w-4 h-4 text-accent-primary animate-spin" />}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Footer note */}
+        <div className="p-4 border-t border-border">
+          <p className="text-xs text-text-secondary text-center">
+            Your files will be streamed from this computer to the TV
+          </p>
+        </div>
+      </div>
+    </div>
   )
 }

@@ -122,6 +122,15 @@ export interface BaseItemDto {
   PlayAccess?: string
   CanDelete?: boolean
   CanDownload?: boolean
+  // Music-specific properties
+  AlbumArtist?: string
+  AlbumArtists?: { Name: string; Id: string }[]
+  Artists?: string[]
+  ArtistItems?: { Name: string; Id: string }[]
+  AlbumCount?: number
+  SongCount?: number
+  AlbumId?: string
+  Album?: string
 }
 
 export type ItemType =

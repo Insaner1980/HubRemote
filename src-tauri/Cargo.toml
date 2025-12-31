@@ -1,5 +1,5 @@
 [package]
-name = "jellyremote"
+name = "hubremote"
 version = "0.1.0"
 description = "A Jellyfin remote control application"
 authors = ["you"]
@@ -9,14 +9,25 @@ edition = "2021"
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["tray-icon", "image-ico"] }
 tauri-plugin-shell = "2"
+tauri-plugin-global-shortcut = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-libmpv = "2.0"
 parking_lot = "0.12"
 log = "0.4"
+env_logger = "0.11"
 thiserror = "1.0"
+tokio = { version = "1", features = ["full"] }
+axum = "0.7"
+tower-http = { version = "0.5", features = ["cors", "fs"] }
+local-ip-address = "0.6"
+async-stream = "0.3"
+bytes = "1"
+futures-core = "0.3"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = ["Win32_UI_WindowsAndMessaging", "Win32_Foundation"] }
 
 [profile.release]
 panic = "abort"

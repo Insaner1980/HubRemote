@@ -1,1 +1,1 @@
-{}
+{"default":{"identifier":"default","description":"Default capability for HubRemote","local":true,"windows":["main"],"permissions":["core:default","core:window:allow-set-size","core:window:allow-inner-size","shell:allow-open","global-shortcut:allow-is-registered","global-shortcut:allow-register","global-shortcut:allow-register-all","global-shortcut:allow-unregister","global-shortcut:allow-unregister-all"]}}

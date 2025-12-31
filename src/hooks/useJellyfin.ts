@@ -47,10 +47,13 @@ export function useItems(options: GetItemsOptions = {}) {
   const userId = useUserId()
   const isAuthenticated = useIsAuthenticated()
 
+  // Don't fetch if no parentId is specified (would return root views instead of library items)
+  const hasValidOptions = !!options.parentId
+
   return useQuery({
     queryKey: jellyfinKeys.items(options),
     queryFn: () => jellyfinApi.getItems(userId!, options),
-    enabled: isAuthenticated && !!userId,
+    enabled: isAuthenticated && !!userId && hasValidOptions,
   })
 }
 

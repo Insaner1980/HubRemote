@@ -12,6 +12,7 @@ interface NavigationContextType {
   state: NavigationState
   navigate: (page: Page, params?: Record<string, string>) => void
   navigateToItem: (itemId: string) => void
+  navigateToPlayer: (itemId: string, startPositionTicks?: number) => void
   goBack: () => void
   canGoBack: boolean
 }
@@ -45,6 +46,14 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     navigate('item', { itemId })
   }, [navigate])
 
+  const navigateToPlayer = useCallback((itemId: string, startPositionTicks?: number) => {
+    const params: Record<string, string> = { itemId }
+    if (startPositionTicks !== undefined) {
+      params.startPositionTicks = String(startPositionTicks)
+    }
+    navigate('player', params)
+  }, [navigate])
+
   const goBack = useCallback(() => {
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1)
@@ -59,6 +68,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
         state,
         navigate,
         navigateToItem,
+        navigateToPlayer,
         goBack,
         canGoBack,
       }}

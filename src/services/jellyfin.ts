@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { useConfigStore } from '../stores/configStore'
+import { toast } from '../stores/toastStore'
 import type {
   AuthenticationResult,
   BaseItemDto,
@@ -14,6 +15,15 @@ import type {
   GeneralCommandType,
   PlayCommand,
 } from '../types'
+
+// Error logging helper
+const logError = (context: string, error: unknown) => {
+  if (import.meta.env.DEV) {
+    console.group(`%c API Error: ${context}`, 'color: red; font-weight: bold')
+    console.error(error)
+    console.groupEnd()
+  }
+}
 
 // ============================================
 // Axios Instance & Interceptors
@@ -59,25 +69,41 @@ const createApiClient = (): AxiosInstance => {
         message: error.message,
       }
 
+      let toastTitle = 'Error'
+      let showToast = true
+
       if (error.response) {
         switch (error.response.status) {
           case 401:
             apiError.message = 'Authentication failed. Please log in again.'
             apiError.code = 'UNAUTHORIZED'
+            toastTitle = 'Authentication Failed'
             // Clear credentials on 401
             useConfigStore.getState().clearCredentials()
             break
           case 403:
             apiError.message = 'Access denied. You do not have permission.'
             apiError.code = 'FORBIDDEN'
+            toastTitle = 'Access Denied'
             break
           case 404:
             apiError.message = 'Resource not found.'
             apiError.code = 'NOT_FOUND'
+            toastTitle = 'Not Found'
+            // Don't show toast for 404s - they're often expected
+            showToast = false
             break
           case 500:
             apiError.message = 'Server error. Please try again later.'
             apiError.code = 'SERVER_ERROR'
+            toastTitle = 'Server Error'
+            break
+          case 502:
+          case 503:
+          case 504:
+            apiError.message = 'Server is temporarily unavailable.'
+            apiError.code = 'SERVER_UNAVAILABLE'
+            toastTitle = 'Server Unavailable'
             break
           default:
             apiError.message = (error.response.data as { Message?: string })?.Message ?? error.message
@@ -85,9 +111,19 @@ const createApiClient = (): AxiosInstance => {
       } else if (error.code === 'ECONNABORTED') {
         apiError.message = 'Request timed out. Please check your connection.'
         apiError.code = 'TIMEOUT'
+        toastTitle = 'Request Timeout'
       } else if (!error.response) {
-        apiError.message = 'Unable to connect to server. Please check the URL.'
+        apiError.message = 'Cannot connect to server. Please check the URL and your network.'
         apiError.code = 'NETWORK_ERROR'
+        toastTitle = 'Connection Failed'
+      }
+
+      // Log error in development
+      logError(error.config?.url || 'Unknown endpoint', apiError)
+
+      // Show toast notification
+      if (showToast) {
+        toast.error(toastTitle, apiError.message)
       }
 
       return Promise.reject(apiError)
@@ -319,17 +355,41 @@ export const jellyfinApi = {
   /**
    * Get next up episodes for a user
    */
-  async getNextUp(userId: string, limit: number = 12): Promise<BaseItemDto[]> {
+  async getNextUp(userId: string, limit: number = 12, seriesId?: string): Promise<BaseItemDto[]> {
     const response = await api.get<ItemsResponse>('/Shows/NextUp', {
       params: {
         UserId: userId,
         Limit: limit,
+        SeriesId: seriesId,
         Fields: DEFAULT_FIELDS,
         EnableImages: true,
         EnableImageTypes: DEFAULT_IMAGE_TYPES,
       },
     })
     return response.data.Items
+  },
+
+  /**
+   * Get first episode of a series (for play button when no progress exists)
+   */
+  async getFirstEpisode(seriesId: string, userId: string): Promise<BaseItemDto | null> {
+    try {
+      // First try NextUp (next unwatched episode)
+      const nextUp = await this.getNextUp(userId, 1, seriesId)
+      if (nextUp.length > 0) {
+        return nextUp[0]
+      }
+
+      // If no NextUp, get first episode of first season
+      const seasons = await this.getSeasons(seriesId, userId)
+      if (!seasons.length) return null
+
+      const episodes = await this.getEpisodes(seriesId, seasons[0].Id!, userId)
+      return episodes.length > 0 ? episodes[0] : null
+    } catch (error) {
+      console.error('Failed to get first episode:', error)
+      return null
+    }
   },
 
   // ------------------------------------------
@@ -342,7 +402,6 @@ export const jellyfinApi = {
   async getSessions(): Promise<SessionInfo[]> {
     const response = await api.get<SessionInfo[]>('/Sessions', {
       params: {
-        ControllableByUserId: useConfigStore.getState().userId,
         ActiveWithinSeconds: 960,
       },
     })
@@ -527,6 +586,106 @@ export const jellyfinApi = {
       quality: 90,
       ...options,
     })
+  },
+
+  // ------------------------------------------
+  // Streaming
+  // ------------------------------------------
+
+  /**
+   * Get video stream URL for direct play
+   */
+  getStreamUrl(
+    itemId: string,
+    mediaSourceId?: string,
+    container?: string
+  ): string {
+    const { serverUrl, accessToken } = useConfigStore.getState()
+
+    if (!serverUrl) return ''
+
+    const params = new URLSearchParams()
+    params.set('Static', 'true')
+    params.set('mediaSourceId', mediaSourceId || itemId)
+    if (container) {
+      params.set('Container', container)
+    }
+    if (accessToken) {
+      params.set('api_key', accessToken)
+    }
+
+    return `${serverUrl}/Videos/${itemId}/stream?${params.toString()}`
+  },
+
+  /**
+   * Get video stream URL with full playback info
+   * This gets the proper URL with all necessary parameters
+   */
+  async getPlaybackInfo(
+    itemId: string,
+    userId: string
+  ): Promise<{ url: string; mediaSourceId: string; container: string; playSessionId?: string } | null> {
+    try {
+      const response = await api.post<{
+        MediaSources: Array<{
+          Id: string
+          Container: string
+          Path: string
+          Protocol: string
+          SupportsDirectPlay: boolean
+          SupportsDirectStream: boolean
+        }>
+        PlaySessionId?: string
+      }>(`/Items/${itemId}/PlaybackInfo?userId=${userId}`, {
+        StartTimeTicks: 0,
+        IsPlayback: true,
+        AutoOpenLiveStream: true,
+        MaxStreamingBitrate: 140000000,
+      })
+
+      const mediaSource = response.data.MediaSources?.[0]
+      if (!mediaSource) return null
+
+      // If it's a local file (Protocol: "File"), use the path directly
+      // This works when the file is accessible (e.g., local drive or mounted network drive)
+      if (mediaSource.Protocol === 'File' && mediaSource.Path && mediaSource.SupportsDirectPlay) {
+        return {
+          url: mediaSource.Path,
+          mediaSourceId: mediaSource.Id,
+          container: mediaSource.Container,
+          playSessionId: response.data.PlaySessionId,
+        }
+      }
+
+      // For remote files, use the streaming URL
+      const { serverUrl, accessToken } = useConfigStore.getState()
+      if (!serverUrl) return null
+
+      // Build the stream URL
+      const params = new URLSearchParams()
+      params.set('Static', 'true')
+      params.set('mediaSourceId', mediaSource.Id)
+      params.set('Container', mediaSource.Container)
+      if (accessToken) {
+        params.set('api_key', accessToken)
+      }
+
+      return {
+        url: `${serverUrl}/Videos/${itemId}/stream.${mediaSource.Container}?${params.toString()}`,
+        mediaSourceId: mediaSource.Id,
+        container: mediaSource.Container,
+        playSessionId: response.data.PlaySessionId,
+      }
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { status?: number; data?: unknown }; message?: string }
+      console.error('API Error:', `/Items/${itemId}/PlaybackInfo?userId=${userId}`)
+      console.error('Failed to get playback info:', {
+        status: axiosError.response?.status,
+        data: axiosError.response?.data,
+        message: axiosError.message
+      })
+      return null
+    }
   },
 
   // ------------------------------------------

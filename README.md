@@ -1,4 +1,4 @@
-# JellyRemote
+# HubRemote
 
 A Jellyfin remote control and media player application built with Tauri 2.0, React, and TypeScript.
 
@@ -66,8 +66,8 @@ sudo pacman -S mpv
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/Insaner1980/JellyRemote.git
-cd JellyRemote
+git clone https://github.com/Insaner1980/HubRemote.git
+cd HubRemote
 ```
 
 2. Install dependencies:
@@ -103,7 +103,7 @@ The built application will be in `src-tauri/target/release/`.
 ## Project Structure
 
 ```
-jellyremote/
+hubremote/
 ├── src/                    # React frontend
 │   ├── components/         # Reusable UI components
 │   ├── contexts/           # React contexts

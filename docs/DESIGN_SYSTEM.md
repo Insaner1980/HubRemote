@@ -1,4 +1,4 @@
-# JellyRemote Design System
+# HubRemote Design System
 
 Dark cinema theme with red accent - designed for media browsing in low-light environments.
 

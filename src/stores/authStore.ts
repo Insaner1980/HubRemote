@@ -130,7 +130,7 @@ export const useAuthStore = create<AuthState>()(
       clearError: () => set({ error: null }),
     }),
     {
-      name: 'jellyremote-auth',
+      name: 'hubremote-auth',
       partialize: (state) => ({
         user: state.user,
         serverInfo: state.serverInfo,

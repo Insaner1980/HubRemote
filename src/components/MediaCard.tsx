@@ -117,7 +117,7 @@ export const MediaCard = memo(function MediaCard({
         {hasProgress && (
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/50">
             <div
-              className="h-full bg-accent-primary transition-all"
+              className="h-full bg-accent-primary progress-bar"
               style={{ width: `${progress}%` }}
             />
           </div>

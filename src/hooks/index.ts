@@ -25,3 +25,7 @@ export {
 
 export { useLibraryParams } from './useUrlParams'
 export type { LibraryParams } from './useUrlParams'
+
+export { useGlobalShortcuts } from './useGlobalShortcuts'
+export { useTray } from './useTray'
+export { useRclone } from './useRclone'

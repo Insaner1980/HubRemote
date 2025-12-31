@@ -1,4 +1,4 @@
-# JellyRemote - Development Guide
+# HubRemote - Development Guide
 
 Tauri + React app for Jellyfin media browsing and playback with MPV backend.
 

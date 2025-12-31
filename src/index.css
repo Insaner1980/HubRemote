@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ============================================
-   JellyRemote Design System - Base Styles
+   HubRemote Design System - Base Styles
    ============================================ */
 
 @layer base {
@@ -83,30 +83,91 @@
   }
 
   .card-hover {
-    @apply card hover:bg-bg-hover transition-colors cursor-pointer;
+    @apply card cursor-pointer;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:bg-bg-hover;
   }
 
-  /* Button variants */
+  /* Media card with scale effect */
+  .media-card {
+    @apply bg-bg-secondary rounded-lg overflow-hidden;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:shadow-xl hover:shadow-black/40;
+    transform: translateZ(0); /* GPU acceleration */
+  }
+
+  .media-card:hover {
+    transform: scale(1.03) translateZ(0);
+  }
+
+  /* Button variants with interactions */
   .btn {
-    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium transition-colors;
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-md font-medium;
+    @apply transition-all duration-150 ease-out;
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary;
-    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none;
+    @apply active:scale-[0.98];
   }
 
   .btn-primary {
-    @apply btn bg-accent-primary text-white hover:bg-accent-hover;
+    @apply btn bg-accent-primary text-white;
+    @apply hover:bg-accent-hover hover:shadow-lg hover:shadow-accent-primary/25;
   }
 
   .btn-secondary {
-    @apply btn bg-bg-secondary text-text-primary border border-border hover:bg-bg-hover;
+    @apply btn bg-bg-secondary text-text-primary border border-border;
+    @apply hover:bg-bg-hover hover:border-border;
   }
 
   .btn-ghost {
-    @apply btn bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover;
+    @apply btn bg-transparent text-text-secondary;
+    @apply hover:text-text-primary hover:bg-bg-hover;
   }
 
   .btn-icon {
-    @apply btn p-2 bg-transparent text-text-secondary hover:text-text-primary hover:bg-bg-hover;
+    @apply btn p-2 bg-transparent text-text-secondary;
+    @apply hover:text-text-primary hover:bg-bg-hover;
+  }
+
+  /* Loading spinner */
+  .btn-loading {
+    @apply relative text-transparent;
+  }
+
+  .btn-loading::after {
+    content: '';
+    @apply absolute inset-0 m-auto w-5 h-5;
+    @apply border-2 border-current border-t-transparent rounded-full;
+    animation: spin 0.6s linear infinite;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply bg-bg-hover rounded;
+    background: linear-gradient(
+      90deg,
+      var(--bg-hover) 0%,
+      #303030 50%,
+      var(--bg-hover) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-text {
+    @apply skeleton h-4 rounded;
+  }
+
+  .skeleton-title {
+    @apply skeleton h-6 rounded w-3/4;
+  }
+
+  .skeleton-card {
+    @apply skeleton aspect-[2/3] rounded-lg;
+  }
+
+  .skeleton-thumb {
+    @apply skeleton aspect-video rounded-lg;
   }
 
   /* Input styles */
@@ -230,4 +291,145 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: #3a3a3a;
+}
+
+/* ============================================
+   Animations & Keyframes
+   ============================================ */
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation utility classes */
+.animate-fade-in {
+  animation: fade-in 150ms ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 200ms ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scale-in 200ms ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 200ms ease-out forwards;
+}
+
+/* Staggered animations */
+.stagger-item {
+  opacity: 0;
+  animation: fade-in-up 200ms ease-out forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }
+
+/* Page transition */
+.page-enter {
+  animation: fade-in 150ms ease-out;
+}
+
+/* Modal/Overlay animations */
+.modal-backdrop {
+  animation: fade-in 150ms ease-out;
+}
+
+.modal-content {
+  animation: scale-in 200ms ease-out;
+}
+
+/* Progress bar smooth transition */
+.progress-bar {
+  transition: width 300ms ease-out;
+}
+
+/* ============================================
+   Reduced Motion Support
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .skeleton {
+    animation: none;
+    background: var(--bg-hover);
+  }
+
+  .media-card:hover {
+    transform: none;
+  }
+
+  .btn:active {
+    transform: none;
+  }
 }

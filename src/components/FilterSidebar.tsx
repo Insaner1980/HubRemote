@@ -1,6 +1,6 @@
 import { memo, useEffect } from 'react'
 import { X, Check, RotateCcw } from 'lucide-react'
-import type { LibraryParams } from '../hooks/useUrlParams'
+import type { LibraryParams, LibraryCategory } from '../hooks/useUrlParams'
 
 interface FilterSidebarProps {
   isOpen: boolean
@@ -11,6 +11,7 @@ interface FilterSidebarProps {
   availableGenres: string[]
   availableYears: number[]
   hasActiveFilters: boolean
+  category?: LibraryCategory | null
 }
 
 export const FilterSidebar = memo(function FilterSidebar({
@@ -22,6 +23,7 @@ export const FilterSidebar = memo(function FilterSidebar({
   availableGenres,
   availableYears,
   hasActiveFilters,
+  category,
 }: FilterSidebarProps) {
   // Close on escape key
   useEffect(() => {
@@ -99,25 +101,27 @@ export const FilterSidebar = memo(function FilterSidebar({
 
         {/* Filter Content */}
         <div className="overflow-y-auto h-[calc(100%-65px)] scrollbar-thin">
-          {/* Status */}
-          <div className="p-4 border-b border-border">
-            <h3 className="text-sm font-medium text-text-primary mb-3">Status</h3>
-            <div className="flex gap-2">
-              {(['all', 'unwatched', 'watched'] as const).map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setStatus(status)}
-                  className={`flex-1 px-3 py-2 text-sm rounded-lg transition-colors ${
-                    params.status === status
-                      ? 'bg-accent-primary text-white'
-                      : 'bg-bg-hover text-text-secondary hover:text-text-primary'
-                  }`}
-                >
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-                </button>
-              ))}
+          {/* Status - hidden for music */}
+          {category !== 'music' && (
+            <div className="p-4 border-b border-border">
+              <h3 className="text-sm font-medium text-text-primary mb-3">Status</h3>
+              <div className="flex gap-2">
+                {(['all', 'unwatched', 'watched'] as const).map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setStatus(status)}
+                    className={`flex-1 px-3 py-2 text-sm rounded-lg transition-colors ${
+                      params.status === status
+                        ? 'bg-accent-primary text-white'
+                        : 'bg-bg-hover text-text-secondary hover:text-text-primary'
+                    }`}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Genres */}
           {availableGenres.length > 0 && (

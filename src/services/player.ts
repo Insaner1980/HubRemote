@@ -34,6 +34,7 @@ export interface PlayOptions {
   auth_token?: string
 }
 
+
 // ============================================
 // Helper Functions
 // ============================================
@@ -224,6 +225,31 @@ export const playerService = {
    */
   async setPlaybackSpeed(speed: number): Promise<void> {
     await unwrapVoid(invoke<CommandResult<null>>('set_playback_speed', { speed }))
+  },
+
+  // ------------------------------------------
+  // Fullscreen
+  // ------------------------------------------
+
+  /**
+   * Toggle fullscreen mode
+   */
+  async toggleFullscreen(): Promise<void> {
+    await unwrapVoid(invoke<CommandResult<null>>('toggle_fullscreen'))
+  },
+
+  /**
+   * Set fullscreen mode
+   */
+  async setFullscreen(fullscreen: boolean): Promise<void> {
+    await unwrapVoid(invoke<CommandResult<null>>('set_fullscreen', { fullscreen }))
+  },
+
+  /**
+   * Check if player is fullscreen
+   */
+  async isFullscreen(): Promise<boolean> {
+    return unwrapResult(invoke<CommandResult<boolean>>('is_fullscreen'))
   },
 }
 

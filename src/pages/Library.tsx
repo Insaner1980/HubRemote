@@ -1,13 +1,21 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
-import { Library as LibraryIcon, Loader2, Search, FolderOpen } from 'lucide-react'
+import { Loader2, Search, FolderOpen } from 'lucide-react'
 import { MediaCard, FilterSidebar, LibraryHeader } from '../components'
+import { MusicCard } from '../components/MusicCard'
 import { useLibraries, useItems } from '../hooks'
-import { useLibraryParams } from '../hooks/useUrlParams'
+import { useLibraryParams, MusicSubFilter } from '../hooks/useUrlParams'
 import { useNavigation } from '../contexts/NavigationContext'
 import { jellyfinApi } from '../services'
-import type { BaseItemDto, GetItemsOptions } from '../types'
+import type { BaseItemDto, GetItemsOptions, ItemType } from '../types'
 
 const ITEMS_PER_PAGE = 24
+
+// Music sub-filter configuration
+const MUSIC_SUBFILTERS: { id: MusicSubFilter; label: string; itemType: ItemType }[] = [
+  { id: 'artists', label: 'Artists', itemType: 'MusicArtist' },
+  { id: 'albums', label: 'Albums', itemType: 'MusicAlbum' },
+  { id: 'songs', label: 'Songs', itemType: 'Audio' },
+]
 
 export default function Library() {
   const { navigateToItem } = useNavigation()
@@ -17,15 +25,28 @@ export default function Library() {
   // Fetch libraries for the selector
   const { data: libraries, isLoading: librariesLoading } = useLibraries()
 
-  // Select first library if none selected
+  // Select library based on category
   useEffect(() => {
-    if (!params.libraryId && libraries?.length) {
-      const firstLibrary = libraries.find(
-        (lib) => lib.CollectionType === 'movies' || lib.CollectionType === 'tvshows'
-      ) || libraries[0]
-      setParams({ libraryId: firstLibrary.Id })
+    if (libraries?.length) {
+      // Find library matching the current category
+      const matchingLibrary = params.category
+        ? libraries.find((lib) => lib.CollectionType === params.category)
+        : libraries.find(
+            (lib) => lib.CollectionType === 'movies' || lib.CollectionType === 'tvshows'
+          ) || libraries[0]
+
+      if (matchingLibrary) {
+        if (matchingLibrary.Id !== params.libraryId) {
+          setParams({ libraryId: matchingLibrary.Id })
+        }
+      } else {
+        // No matching library found - clear libraryId to show empty state
+        if (params.libraryId) {
+          setParams({ libraryId: null })
+        }
+      }
     }
-  }, [libraries, params.libraryId, setParams])
+  }, [libraries, params.category, params.libraryId, setParams])
 
   // Current library
   const currentLibrary = useMemo(
@@ -35,7 +56,11 @@ export default function Library() {
 
   // Build query options
   const queryOptions: GetItemsOptions = useMemo(() => {
-    if (!params.libraryId) return {}
+    console.log('Building query options:', { category: params.category, libraryId: params.libraryId })
+    if (!params.libraryId) {
+      console.log('No libraryId - returning empty options')
+      return {}
+    }
 
     const options: GetItemsOptions = {
       parentId: params.libraryId,
@@ -47,11 +72,15 @@ export default function Library() {
       imageTypeLimit: 1,
     }
 
-    // Add item type filter based on library type
-    if (currentLibrary?.CollectionType === 'movies') {
+    // Add item type filter based on category
+    if (params.category === 'movies') {
       options.includeItemTypes = ['Movie']
-    } else if (currentLibrary?.CollectionType === 'tvshows') {
+    } else if (params.category === 'tvshows') {
       options.includeItemTypes = ['Series']
+    } else if (params.category === 'music') {
+      // Use subFilter to determine music item type
+      const subFilter = MUSIC_SUBFILTERS.find((f) => f.id === params.subFilter)
+      options.includeItemTypes = [subFilter?.itemType || 'MusicArtist']
     }
 
     // Add genre filter
@@ -64,20 +93,24 @@ export default function Library() {
       options.years = params.years
     }
 
-    // Add watched status filter
-    if (params.status === 'watched') {
-      options.isPlayed = true
-    } else if (params.status === 'unwatched') {
-      options.isPlayed = false
+    // Add watched status filter (not applicable for music)
+    if (params.category !== 'music') {
+      if (params.status === 'watched') {
+        options.isPlayed = true
+      } else if (params.status === 'unwatched') {
+        options.isPlayed = false
+      }
     }
 
     return options
-  }, [params, currentLibrary])
+  }, [params])
 
   // Fetch items
   const { data: itemsData, isLoading: itemsLoading, isFetching } = useItems(queryOptions)
 
-  const items = itemsData?.Items || []
+  // Don't show items if no library is selected
+  const items = params.libraryId ? (itemsData?.Items || []) : []
+  console.log('Items count:', items.length, 'libraryId:', params.libraryId)
   const totalCount = itemsData?.TotalRecordCount || 0
   const hasMore = items.length < totalCount
 
@@ -107,11 +140,6 @@ export default function Library() {
     navigateToItem(item.Id)
   }
 
-  const handleLibraryChange = (libraryId: string) => {
-    setParams({ libraryId, page: 1 })
-    resetFilters()
-  }
-
   // Loading state
   if (librariesLoading) {
     return (
@@ -121,26 +149,56 @@ export default function Library() {
     )
   }
 
+  // Get category title
+  const getCategoryTitle = () => {
+    switch (params.category) {
+      case 'movies':
+        return 'Movies'
+      case 'tvshows':
+        return 'Series'
+      case 'music':
+        return 'Music'
+      default:
+        return currentLibrary?.Name || 'Library'
+    }
+  }
+
+  // Handle sub-filter change for music
+  const handleSubFilterChange = (subFilter: MusicSubFilter) => {
+    setParams({ subFilter, page: 1 })
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Library Tabs */}
-      <div className="px-4 pt-4 pb-2 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2">
-          {libraries?.map((library) => (
-            <button
-              key={library.Id}
-              onClick={() => handleLibraryChange(library.Id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                params.libraryId === library.Id
-                  ? 'bg-accent-primary text-white'
-                  : 'bg-bg-secondary text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              <LibraryIcon className="w-4 h-4" />
-              {library.Name}
-            </button>
-          ))}
+      {/* Category Title & Music Sub-filters */}
+      <div className="px-4 pt-4 pb-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-text-primary">{getCategoryTitle()}</h1>
+          {!currentLibrary && params.category && (
+            <span className="text-text-secondary text-sm">
+              No {params.category} library found
+            </span>
+          )}
         </div>
+
+        {/* Music sub-filter pills */}
+        {params.category === 'music' && currentLibrary && (
+          <div className="flex gap-2 mt-3">
+            {MUSIC_SUBFILTERS.map((filter) => (
+              <button
+                key={filter.id}
+                onClick={() => handleSubFilterChange(filter.id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  params.subFilter === filter.id
+                    ? 'bg-accent-primary text-white'
+                    : 'bg-bg-secondary text-text-secondary hover:text-text-primary'
+                }`}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Header */}
@@ -167,15 +225,28 @@ export default function Library() {
               </div>
             ) : items.length > 0 ? (
               <>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                  {items.map((item) => (
-                    <MediaCard
-                      key={item.Id}
-                      item={item}
-                      onClick={handleItemClick}
-                      size="lg"
-                    />
-                  ))}
+                <div className={`grid gap-4 ${
+                  params.category === 'music'
+                    ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+                    : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+                }`}>
+                  {items.map((item) =>
+                    params.category === 'music' ? (
+                      <MusicCard
+                        key={item.Id}
+                        item={item}
+                        onClick={() => handleItemClick(item)}
+                        variant={params.subFilter === 'artists' ? 'artist' : 'album'}
+                      />
+                    ) : (
+                      <MediaCard
+                        key={item.Id}
+                        item={item}
+                        onClick={handleItemClick}
+                        size="lg"
+                      />
+                    )
+                  )}
                 </div>
 
                 {/* Load More Button */}
@@ -266,6 +337,7 @@ export default function Library() {
         availableGenres={availableGenres}
         availableYears={availableYears}
         hasActiveFilters={hasActiveFilters}
+        category={params.category}
       />
     </div>
   )

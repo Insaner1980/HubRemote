@@ -49,10 +49,10 @@ export const MediaRow = memo(function MediaRow({
   return (
     <section className="relative group/row">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 px-4">
-        <h2 className="text-lg font-semibold text-text-primary">{title}</h2>
+      <div className="flex items-center justify-between mb-2 px-3">
+        <h2 className="text-base font-semibold text-text-primary">{title}</h2>
         {items.length > 5 && (
-          <button className="text-sm text-text-secondary hover:text-text-primary transition-colors">
+          <button className="text-xs text-text-secondary hover:text-text-primary transition-colors">
             See All
           </button>
         )}
@@ -90,7 +90,7 @@ export const MediaRow = memo(function MediaRow({
         <div
           ref={scrollContainerRef}
           onScroll={handleScroll}
-          className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-4"
+          className="flex gap-2 overflow-x-auto scrollbar-hide px-3 pb-3"
         >
           {isLoading ? (
             // Loading skeletons

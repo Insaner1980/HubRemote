@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import { Loader2 } from 'lucide-react'
-import { HeroBanner, MediaRow } from '../components'
+import { HeroBanner, MediaRow, ErrorState } from '../components'
 import { useLibraries, useResumeItems, useLatestItems, useNextUp, useItems } from '../hooks'
 import { useNavigation } from '../contexts/NavigationContext'
 import type { BaseItemDto } from '../types'
 
 export default function Home() {
-  const { navigateToItem } = useNavigation()
-  const { data: libraries, isLoading: librariesLoading } = useLibraries()
+  const { navigateToItem, navigateToPlayer } = useNavigation()
+  const { data: libraries, isLoading: librariesLoading, error: librariesError, refetch: refetchLibraries } = useLibraries()
   const { data: resumeItems, isLoading: resumeLoading } = useResumeItems(12)
   const { data: nextUpItems, isLoading: nextUpLoading } = useNextUp(12)
   const { data: latestItems, isLoading: latestLoading } = useLatestItems(undefined, 16)
@@ -83,8 +83,14 @@ export default function Home() {
   }
 
   const handlePlay = (item: BaseItemDto) => {
-    console.log('Play:', item.Name, item.Id)
-    // TODO: Start playback
+    // For Series, navigate to detail page to select episode
+    if (item.Type === 'Series') {
+      navigateToItem(item.Id)
+      return
+    }
+    // For Movies and Episodes, start playback directly
+    const startPosition = item.UserData?.PlaybackPositionTicks || 0
+    navigateToPlayer(item.Id, startPosition)
   }
 
   const handleMoreInfo = (item: BaseItemDto) => {
@@ -92,6 +98,17 @@ export default function Home() {
   }
 
   const isInitialLoading = librariesLoading && !libraries
+
+  // Show error state if libraries failed to load
+  if (librariesError && !libraries) {
+    return (
+      <ErrorState
+        error={librariesError}
+        onRetry={() => refetchLibraries()}
+        fullPage
+      />
+    )
+  }
 
   if (isInitialLoading) {
     return (
@@ -112,7 +129,7 @@ export default function Home() {
       />
 
       {/* Content Rows */}
-      <div className="space-y-6 py-6">
+      <div className="space-y-4 py-4">
         {/* Continue Watching */}
         <MediaRow
           title="Continue Watching"
@@ -131,22 +148,22 @@ export default function Home() {
           cardSize="md"
         />
 
-        {/* Movies */}
+        {/* Movies - filter to ensure only actual movies are shown */}
         {(moviesData?.Items?.length || moviesLoading) && (
           <MediaRow
             title="Movies"
-            items={moviesData?.Items || []}
+            items={(moviesData?.Items || []).filter(item => item.Type === 'Movie')}
             onItemClick={handleItemClick}
             isLoading={moviesLoading}
             cardSize="md"
           />
         )}
 
-        {/* TV Shows */}
+        {/* Series */}
         {(tvShowsData?.Items?.length || tvShowsLoading) && (
           <MediaRow
-            title="TV Shows"
-            items={tvShowsData?.Items || []}
+            title="Series"
+            items={(tvShowsData?.Items || []).filter(item => item.Type === 'Series')}
             onItemClick={handleItemClick}
             isLoading={tvShowsLoading}
             cardSize="md"
