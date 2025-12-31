@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { Play } from 'lucide-react'
 import { jellyfinApi } from '../services'
+import { formatRuntime } from '../utils/formatting'
 import type { BaseItemDto } from '../types'
 
 interface MediaCardProps {
@@ -31,14 +32,6 @@ function getProgressPercent(item: BaseItemDto): number {
   if (!position) return 0
 
   return Math.min(100, (position / item.RunTimeTicks) * 100)
-}
-
-function formatRuntime(ticks: number): string {
-  const minutes = Math.floor(ticks / 600000000)
-  if (minutes < 60) return `${minutes}m`
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-  return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
 }
 
 export const MediaCard = memo(function MediaCard({
@@ -100,7 +93,7 @@ export const MediaCard = memo(function MediaCard({
             {item.ProductionYear && item.Type !== 'Episode' && (
               <p className="text-xs text-text-secondary mt-0.5 text-left">
                 {item.ProductionYear}
-                {item.RunTimeTicks && ` · ${formatRuntime(item.RunTimeTicks)}`}
+                {item.RunTimeTicks && ` · ${formatRuntime(item.RunTimeTicks, true)}`}
               </p>
             )}
           </div>

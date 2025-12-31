@@ -56,9 +56,7 @@ export default function Library() {
 
   // Build query options
   const queryOptions: GetItemsOptions = useMemo(() => {
-    console.log('Building query options:', { category: params.category, libraryId: params.libraryId })
     if (!params.libraryId) {
-      console.log('No libraryId - returning empty options')
       return {}
     }
 
@@ -110,7 +108,6 @@ export default function Library() {
 
   // Don't show items if no library is selected
   const items = params.libraryId ? (itemsData?.Items || []) : []
-  console.log('Items count:', items.length, 'libraryId:', params.libraryId)
   const totalCount = itemsData?.TotalRecordCount || 0
   const hasMore = items.length < totalCount
 

@@ -1,16 +1,12 @@
 import { memo } from 'react'
 import { Play, Check } from 'lucide-react'
 import { jellyfinApi } from '../services'
+import { formatRuntime } from '../utils/formatting'
 import type { BaseItemDto } from '../types'
 
 interface EpisodeCardProps {
   episode: BaseItemDto
   onClick?: (episode: BaseItemDto) => void
-}
-
-function formatRuntime(ticks: number): string {
-  const minutes = Math.floor(ticks / 600000000)
-  return `${minutes} min`
 }
 
 function formatDate(dateString: string): string {

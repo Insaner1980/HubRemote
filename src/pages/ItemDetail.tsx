@@ -22,19 +22,12 @@ import { useItem, useSeasons, useEpisodes, useSimilarItems, useToggleFavorite, u
 import { useNavigation } from '../contexts/NavigationContext'
 import { useConfigStore } from '../stores/configStore'
 import { jellyfinApi, streamingService } from '../services'
+import { formatRuntime } from '../utils/formatting'
 import { toast } from '../stores/toastStore'
 import type { BaseItemDto, SessionInfo } from '../types'
 
 interface ItemDetailProps {
   itemId: string
-}
-
-function formatRuntime(ticks: number): string {
-  const minutes = Math.floor(ticks / 600000000)
-  if (minutes < 60) return `${minutes} min`
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-  return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
 }
 
 export default function ItemDetail({ itemId }: ItemDetailProps) {

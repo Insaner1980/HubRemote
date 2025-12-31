@@ -1,6 +1,7 @@
 import { memo, useMemo } from 'react'
 import { Play, Info, Star } from 'lucide-react'
 import { jellyfinApi } from '../services'
+import { formatRuntime } from '../utils/formatting'
 import type { BaseItemDto } from '../types'
 
 interface HeroBannerProps {
@@ -8,14 +9,6 @@ interface HeroBannerProps {
   onPlay?: (item: BaseItemDto) => void
   onMoreInfo?: (item: BaseItemDto) => void
   isLoading?: boolean
-}
-
-function formatRuntime(ticks: number): string {
-  const minutes = Math.floor(ticks / 600000000)
-  if (minutes < 60) return `${minutes} min`
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-  return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
 }
 
 function getYear(item: BaseItemDto): string | null {
