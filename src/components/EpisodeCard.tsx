@@ -52,6 +52,7 @@ export const EpisodeCard = memo(function EpisodeCard({
   return (
     <button
       onClick={() => onClick?.(episode)}
+      aria-label={`Play episode ${episodeNumber}: ${episode.Name}`}
       className="w-full flex gap-3 p-2 rounded-lg hover:bg-bg-hover transition-colors text-left group"
     >
       {/* Thumbnail */}

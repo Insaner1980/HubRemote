@@ -58,6 +58,7 @@ export const MediaCard = memo(function MediaCard({
   return (
     <button
       onClick={() => onClick?.(item)}
+      aria-label={`Play ${item.Type === 'Episode' ? `${item.SeriesName}: ${item.Name}` : item.Name}`}
       className={`${sizeClasses[size]} flex-shrink-0 group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary rounded-xl`}
     >
       {/* Poster Container */}

@@ -207,8 +207,8 @@ function HeroSection({
       {/* Back/Home Button - always visible */}
       <button
         onClick={onBack}
+        aria-label={canGoBack ? 'Go back' : 'Go home'}
         className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-        title={canGoBack ? 'Go back' : 'Go home'}
       >
         {canGoBack ? <ArrowLeft className="w-5 h-5" /> : <Home className="w-5 h-5" />}
       </button>
@@ -293,6 +293,7 @@ function HeroSection({
         <div className="flex flex-wrap gap-2 mt-4">
           <button
             onClick={onPlay}
+            aria-label={progress > 0 ? `Resume ${item.Name}` : `Play ${item.Name}`}
             className="btn-primary flex items-center gap-2 px-6"
           >
             <Play className="w-4 h-4 fill-current" />
@@ -301,6 +302,7 @@ function HeroSection({
 
           <button
             onClick={onCast}
+            aria-label={`Cast ${item.Name} to TV`}
             className="btn-secondary flex items-center gap-2"
           >
             <Tv className="w-4 h-4" />
@@ -309,6 +311,7 @@ function HeroSection({
 
           <button
             onClick={onToggleFavorite}
+            aria-label={isFavorite ? `Remove ${item.Name} from favorites` : `Add ${item.Name} to favorites`}
             className={`btn-icon ${isFavorite ? 'text-red-500' : ''}`}
           >
             <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
@@ -316,6 +319,7 @@ function HeroSection({
 
           <button
             onClick={onTogglePlayed}
+            aria-label={isPlayed ? `Mark ${item.Name} as unwatched` : `Mark ${item.Name} as watched`}
             className={`btn-icon ${isPlayed ? 'text-green-500' : ''}`}
           >
             <Check className="w-5 h-5" />

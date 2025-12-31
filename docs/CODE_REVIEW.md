@@ -103,7 +103,17 @@
 
 ## KORJAUSTEN TILA
 
+### Korkea prioriteetti 🔴
 - [x] 1. ProtectedRoute autentikointi ✅ (korjattu 2025-01-01)
 - [x] 2. Console.log-lauseet ✅ (poistettu 2025-01-01)
 - [x] 3. formatRuntime duplikaatio ✅ (siirretty src/utils/formatting.ts 2025-01-01)
-- [ ] 4-20. Keskitason ja matalan prioriteetin korjaukset
+
+### Keskitaso prioriteetti 🟡
+- [x] 4. Aria-labelit ✅ (lisätty MediaCard, EpisodeCard, ItemDetail nappeihin 2025-01-01)
+- [ ] 5. Monimutkaiset komponentit - ei korjattu (refaktorointi vaatii enemmän suunnittelua)
+- [x] 6. Null-tarkistukset ✅ (tarkistettu - jo paikoillaan)
+- [x] 7. UI-epäyhteneväisyydet ✅ (tarkistettu - johdonmukainen kontekstissa)
+- [x] 8. Input-validointi ✅ (tarkistettu - jo paikoillaan useUrlParams.ts:73)
+
+### Matala prioriteetti 🟢
+- [ ] 9-13. Ei vielä korjattu
