@@ -26,11 +26,9 @@ export function useGlobalShortcuts(enabled: boolean = true) {
             break
           case 'nextTrack':
             // TODO: Implement next track logic (next episode, etc.)
-            console.log('Next track requested')
             break
           case 'previousTrack':
             // TODO: Implement previous track logic
-            console.log('Previous track requested')
             break
           case 'stop':
             await playerService.stop()
@@ -46,8 +44,6 @@ export function useGlobalShortcuts(enabled: boolean = true) {
           case 'mute':
             await playerService.toggleMute()
             break
-          default:
-            console.log('Unknown shortcut action:', action)
         }
       } catch (error) {
         console.error('Error handling shortcut:', error)

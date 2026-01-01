@@ -21,6 +21,7 @@ import { useLibraryParams, LibraryCategory } from '../hooks/useUrlParams'
 import { useUIStore } from '../stores/uiStore'
 import { useConfigStore } from '../stores/configStore'
 import { playerService } from '../services/player'
+import { formatTime } from '../utils/formatting'
 
 type NavPage = 'home' | 'library' | 'player' | 'remote' | 'settings'
 
@@ -47,13 +48,6 @@ const BREAKPOINT_COLLAPSE_SIDEBAR = 1400
 interface LayoutProps {
   children: ReactNode
   showSearch?: boolean
-}
-
-function formatTime(seconds: number): string {
-  if (!isFinite(seconds) || seconds < 0) return '0:00'
-  const m = Math.floor(seconds / 60)
-  const s = Math.floor(seconds % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
 }
 
 // Tooltip component for collapsed sidebar

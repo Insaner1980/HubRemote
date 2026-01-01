@@ -1,6 +1,7 @@
 import { memo } from 'react'
 import { Play } from 'lucide-react'
 import { jellyfinApi } from '../services'
+import { formatRuntime } from '../utils/formatting'
 import type { BaseItemDto } from '../types'
 
 interface MediaCardProps {
@@ -33,14 +34,6 @@ function getProgressPercent(item: BaseItemDto): number {
   return Math.min(100, (position / item.RunTimeTicks) * 100)
 }
 
-function formatRuntime(ticks: number): string {
-  const minutes = Math.floor(ticks / 600000000)
-  if (minutes < 60) return `${minutes}m`
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-  return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`
-}
-
 export const MediaCard = memo(function MediaCard({
   item,
   onClick,
@@ -65,6 +58,7 @@ export const MediaCard = memo(function MediaCard({
   return (
     <button
       onClick={() => onClick?.(item)}
+      aria-label={`Play ${item.Type === 'Episode' ? `${item.SeriesName}: ${item.Name}` : item.Name}`}
       className={`${sizeClasses[size]} flex-shrink-0 group relative focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-primary rounded-xl`}
     >
       {/* Poster Container */}
@@ -100,7 +94,7 @@ export const MediaCard = memo(function MediaCard({
             {item.ProductionYear && item.Type !== 'Episode' && (
               <p className="text-xs text-text-secondary mt-0.5 text-left">
                 {item.ProductionYear}
-                {item.RunTimeTicks && ` · ${formatRuntime(item.RunTimeTicks)}`}
+                {item.RunTimeTicks && ` · ${formatRuntime(item.RunTimeTicks, true)}`}
               </p>
             )}
           </div>

@@ -140,23 +140,20 @@ export function useRclone() {
       // Check if rclone is available
       const rcloneOk = await checkRclone()
       if (!rcloneOk) {
-        console.log('Rclone not available, skipping auto-mount')
         return
       }
 
       // Check current status
       const currentStatus = await checkStatus()
       if (currentStatus?.isMounted) {
-        console.log('Drive already mounted')
         return
       }
 
       // Attempt to mount
-      console.log('Auto-mounting drive...')
       try {
         await mount()
-      } catch (err) {
-        console.error('Auto-mount failed:', err)
+      } catch {
+        // Auto-mount failed silently
       }
     }
 

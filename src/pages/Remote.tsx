@@ -34,16 +34,6 @@ export default function Remote() {
   // Update selected session when sessions list updates
   useEffect(() => {
     if (sessions) {
-      console.log('=== ALL SESSIONS FROM SERVER ===')
-      sessions.forEach(s => {
-        console.log(`- ${s.DeviceName} (${s.Client})`, {
-          Id: s.Id,
-          SupportsRemoteControl: s.SupportsRemoteControl,
-          NowPlaying: s.NowPlayingItem?.Name,
-          UserName: s.UserName,
-        })
-      })
-      console.log('================================')
       updateSelectedSession(sessions)
     }
   }, [sessions, updateSelectedSession])

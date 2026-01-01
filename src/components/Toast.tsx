@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, memo } from 'react'
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import { useToastStore, Toast as ToastType, ToastType as ToastVariant } from '../stores/toastStore'
 
@@ -16,7 +16,7 @@ const bgColorMap: Record<ToastVariant, string> = {
   info: 'bg-blue-500/10 border-blue-500/30',
 }
 
-function ToastItem({ toast }: { toast: ToastType }) {
+const ToastItem = memo(function ToastItem({ toast }: { toast: ToastType }) {
   const { removeToast } = useToastStore()
   const [isLeaving, setIsLeaving] = useState(false)
 
@@ -65,7 +65,7 @@ function ToastItem({ toast }: { toast: ToastType }) {
       </button>
     </div>
   )
-}
+})
 
 export function ToastContainer() {
   const { toasts } = useToastStore()

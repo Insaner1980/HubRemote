@@ -22,11 +22,9 @@ export function useTray() {
             break
           case 'next':
             // TODO: Implement next track
-            console.log('Next track requested from tray')
             break
           case 'previous':
             // TODO: Implement previous track
-            console.log('Previous track requested from tray')
             break
         }
       } catch (error) {
