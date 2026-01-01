@@ -65,8 +65,8 @@ export default function Player({ itemId, mediaSourceId, startPositionTicks }: Pl
 
   const handleExit = useCallback(async () => {
     await reportPlaybackStopped()
-    try { await playerService.stop() } catch {}
-    try { await playerService.destroy() } catch {}
+    try { await playerService.stop() } catch { /* Player may already be stopped */ }
+    try { await playerService.destroy() } catch { /* Player may already be destroyed */ }
     goBack()
   }, [reportPlaybackStopped, goBack])
 
@@ -136,7 +136,7 @@ export default function Player({ itemId, mediaSourceId, startPositionTicks }: Pl
         setPosition(state.position)
         setIsPaused(state.is_paused)
         setVolume(state.volume)
-      } catch {}
+      } catch { /* Ignore state polling errors during playback */ }
     }, 1000)
     return () => { if (stateIntervalRef.current) clearInterval(stateIntervalRef.current) }
   }, [isPlaying])

@@ -116,4 +116,8 @@
 - [x] 8. Input-validointi ✅ (tarkistettu - jo paikoillaan useUrlParams.ts:73)
 
 ### Matala prioriteetti 🟢
-- [ ] 9-13. Ei vielä korjattu
+- [x] 9. React.memo ✅ (lisätty ToastItem komponenttiin 2026-01-01)
+- [ ] 10. Duplikoituja koodimalleja - ei korjattu (ProgressBar-toteutukset ovat eri käyttötarkoituksiin)
+- [x] 11. Magiset numerot ✅ (SCROLL_THRESHOLD vakio lisätty MediaRow.tsx 2026-01-01)
+- [ ] 12. Button vs className - ei korjattu (tyylivalinta, ei vaikuta toimintaan)
+- [x] 13. Tyhjät catch-lohkot ✅ (lisätty selittävät kommentit Player.tsx 2026-01-01)

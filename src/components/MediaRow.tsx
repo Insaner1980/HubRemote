@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { MediaCard } from './MediaCard'
 import type { BaseItemDto } from '../types'
 
+const SCROLL_THRESHOLD = 10
+
 interface MediaRowProps {
   title: string
   items: BaseItemDto[]
@@ -27,8 +29,8 @@ export const MediaRow = memo(function MediaRow({
     if (!container) return
 
     const { scrollLeft, scrollWidth, clientWidth } = container
-    setShowLeftArrow(scrollLeft > 10)
-    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10)
+    setShowLeftArrow(scrollLeft > SCROLL_THRESHOLD)
+    setShowRightArrow(scrollLeft < scrollWidth - clientWidth - SCROLL_THRESHOLD)
   }, [])
 
   const scroll = useCallback((direction: 'left' | 'right') => {
